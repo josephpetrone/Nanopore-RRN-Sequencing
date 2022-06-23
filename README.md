@@ -178,8 +178,7 @@ options:
 > $do \
 > $emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/[ncbi_202006_RRN](/ \
 	--output-dir ./5-emu
-
-done
+> $done
 
 
 
