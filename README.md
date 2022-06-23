@@ -135,7 +135,55 @@ Loop through demultiplexed files to retain names
 > $do \
 > $cutadapt -e 0.2 -O 15 --revcomp -m 3000 -M 7000 -o [path/to/working/folder/4-trimmed/trimmed_$file] -a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG $file \
 > $done
+
+
+### **Concatenate Top and Bottom Strands**
+**Bash Manipulation**
+
+> $cd /path/to/working/folder/4-trimmed/ \
+>  
+> $mkdir reverse \
+> $mkdir forward 
+>
+> $mv ./*_rev.fastq ./reverse \
+> $mv ./*.fastq ./forward \
+> $mv ./forward/*_unclassified.fastq ../ 
 > 
+> $mkdir combined \
+
+Concatenate top and bottom (forward and reverse) into same file \
+> $for f in ./forward/* \
+> $do \
+> $basename=${f##/}
+> $prefix=${basename%%.**} \
+> $cat "$f" ".reverse/${prefix}_"* > .combined/"combined.$basename" \
+> $done
+
+
+### **Taxonomic Classifier**
+**[EMU](https://gitlab.com/treangenlab/emu)** \
+***EMU was installed to a conda environment***
+
+options:
+- --type = map-ont, sr, map-pb
+- --min-abundance = threshold
+- --threads = cpu multithreading for minimap
+- --db = database folder
+- --N = max alignments for each read
+- --output-dir = output directoru
+- --keep-file = keeps sam alignment files for each sample (remove if FALSE)
+
+> $cd /path/to/working/folder/ \
+> $for file in ./4-trimmed/combined/* \
+> $do \
+> $emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/[ncbi_202006_RRN](/ \
+	--output-dir ./5-emu
+
+done
+
+
+
+
 
 
 
