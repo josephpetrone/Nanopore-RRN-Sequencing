@@ -209,6 +209,9 @@ options:
 ```
 
 
+## **RStudio and Phyloseq Handoff**
+
+All ".tsv" output from EMU will need to be placed into one folder for access into RStudio.
 
 
 
