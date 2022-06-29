@@ -79,11 +79,11 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 ```
 2nd time: 
 ```
-> $duplex-tools split_on_adapter --threads [N] --allow_multiple_splits [path/to/working/folder/1-duplextools/split1] [path/to/working/folder/1-duplextools/split2] Native \
+> $duplex-tools split_on_adapter --threads [N] --allow_multiple_splits [path/to/working/folder/1-duplextools/split1] [path/to/working/folder/1-duplextools/split2] Native 
 ```
 10th time: 
 ```
-> $duplex-tools split_on_adapter --threads [N] --allow_multiple_splits [path/to/working/folder/1-duplextools/split9] [path/to/working/folder/1-duplextools/split10] Native \
+> $duplex-tools split_on_adapter --threads [N] --allow_multiple_splits [path/to/working/folder/1-duplextools/split9] [path/to/working/folder/1-duplextools/split10] Native 
 
 > $conda deactivate
 ```
@@ -91,9 +91,9 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 **Bash Manipulation**
 
 ```
-> $cd /path/to/working/folder/1-duplextools/split10/ \
+> $cd /path/to/working/folder/1-duplextools/split10/ 
 
-> $mkdir all \
+> $mkdir all 
  
 > $zcat ./*.fastq.gz > ./all/"filename".fastq
 ```
@@ -104,9 +104,9 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 ```
 > $conda activate nanofilt \
  
-> $cd /path/to/working/folder \
+> $cd /path/to/working/folder 
  
-> $NanoFilt -q [value] --readtype (1D,2D,1D2) [path/to/working/folder/1-duplextools/split10/all/"filename".fastq] > [path/to/working/folder/2-nanofilt/"filename".fastq] \
+> $NanoFilt -q [value] --readtype (1D,2D,1D2) [path/to/working/folder/1-duplextools/split10/all/"filename".fastq] > [path/to/working/folder/2-nanofilt/"filename".fastq] 
 
 > $conda deactivate
 ```
@@ -116,7 +116,7 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 ```
 > $conda activate nanoplex
 
-> $nanoplexer -b [barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa) -d [sample.txt](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/sample.txt) -p [path/to/working/folder/3-demultiplexed/ [path/to/working/folder/2-nanofilt/"filename".fastq] \
+> $nanoplexer -b [barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa) -d [sample.txt](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/sample.txt) -p [path/to/working/folder/3-demultiplexed/ [path/to/working/folder/2-nanofilt/"filename".fastq] 
 ```
 
 
@@ -138,33 +138,33 @@ Loop through demultiplexed files to retain names
 ```
 > $cd [path/to/working/folder/3-demultiplexed]
 
-> $for file in *.* \
-> $do \
-> $cutadapt -e 0.2 -O 15 --revcomp -m 3000 -M 7000 -o [path/to/working/folder/4-trimmed/trimmed_$file] -a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG $file \
+> $for file in *.* 
+> $do 
+> $cutadapt -e 0.2 -O 15 --revcomp -m 3000 -M 7000 -o [path/to/working/folder/4-trimmed/trimmed_$file] -a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG $file 
 > $done
 ```
 
 ### **Concatenate Top and Bottom Strands**
 **Bash Manipulation**
 ```
-> $cd /path/to/working/folder/4-trimmed/ \
+> $cd /path/to/working/folder/4-trimmed/ 
  
-> $mkdir reverse \
+> $mkdir reverse 
 > $mkdir forward 
 
-> $mv ./*_rev.fastq ./reverse \
-> $mv ./*.fastq ./forward \
+> $mv ./*_rev.fastq ./reverse 
+> $mv ./*.fastq ./forward 
 > $mv ./forward/*_unclassified.fastq ../ 
  
-> $mkdir combined \
+> $mkdir combined 
 ```
 Concatenate top and bottom (forward and reverse) into same file \
 ```
-> $for f in ./forward/* \
-> $do \
+> $for f in ./forward/* 
+> $do 
 > $basename=${f##/}
-> $prefix=${basename%%.**} \
-> $cat "$f" ".reverse/${prefix}_"* > .combined/"combined.$basename" \
+> $prefix=${basename%%.**} 
+> $cat "$f" ".reverse/${prefix}_"* > .combined/"combined.$basename" 
 > $done
 ```
 
@@ -181,10 +181,10 @@ options:
 - --output-dir = output directoru
 - --keep-file = keeps sam alignment files for each sample (remove if FALSE)
 ```
-> $cd /path/to/working/folder/ \
-> $for file in ./4-trimmed/combined/* \
-> $do \
-> $emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/[ncbi_202006_RRN](/ \
+> $cd /path/to/working/folder/ 
+> $for file in ./4-trimmed/combined/* 
+> $do 
+> $emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/[ncbi_202006_RRN](/ 
 	--output-dir ./5-emu
 > $done
 ```
