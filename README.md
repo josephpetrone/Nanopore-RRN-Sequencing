@@ -121,10 +121,14 @@ After read-splitting, some reads will now be below the Q-Score cutoff and need t
 ***nanoplexer was installed to a conda environment*** 
 
 This demultiplexer is a third-party script, and uses Minimap to align the barcodes to each read. Nanopores inate barcode splitter takes into account the error rate of the chemistry, and thus theoretically may be more accurate than this program. Due to the nature of our custom barcodes, a third-party software was needed. If you prefer to use Nanopore native barcoding approach with their barcodes, the demultiplexing pipeline may become more accurate.
+
+[barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa)\
+[sample.txt](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/sample.txt)
+
 ```
 > $conda activate nanoplex
 
-> $nanoplexer -b [barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa) -d [sample.txt](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/sample.txt) -p [path/to/working/folder/3-demultiplexed/ [path/to/working/folder/2-nanofilt/"filename".fastq] 
+> $nanoplexer -b ./barcodes.fa -d ./sample.txt -p [path/to/working/folder/3-demultiplexed/] [path/to/working/folder/2-nanofilt/"filename".fastq] 
 ```
 
 
