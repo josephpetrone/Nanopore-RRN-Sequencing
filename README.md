@@ -23,7 +23,9 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 > - 10µM RRN Primer/barcode Forward----------------:   1.25µL 
 > - 10µM RRN Primer/barcode Reverse----------------:   1.25µL 
 > - DNA Input-----------------------------------------:   2µL -or- 10ng 
-> - Sterile Nuclease-Free Water-----------------------:   Complete to 25µL
+> - Sterile Nuclease-Free Water-----------------------:   Complete to 25µL 
+
+Minimum DNA input tested at ~0.5ng total 
 
 
 ## **Thermocylcer Conditions**
@@ -40,17 +42,20 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 ## **Amplification QC**
 ** DO NOT VORTEX AND TRY TO USE WIDE-BORE TIPS TO PREVENT FRAGMENTATION **
 
-**1. Verify Amplification via 1% agarose gel electrophoresis @ 100V for 30min** 
+Any improper handling techniques at this step will increase fragmentation of the amplicons, leading to incomplete "reads" populating the pool and will be thrown away during de-multiplexing.
 
-**2. Quantify product using Qubit HS chemistry**
+> **1. Verify Amplification via 1% agarose gel electrophoresis @ 100V for 30min** 
 
-**3. Pool equal concentrations of DNA into a low-bind 1.5mL tube**\
+> **2. Quantify product using Qubit HS chemistry**
+
+> **3. Pool equal concentrations of DNA into a low-bind 1.5mL tube**\
+
 ***Aim for ≥ 4.5µg (3 Libraries) of DNA in the pool*** \
 ***If volume < 100µL, complete to 100µL with elution buffer*** 
 
-**4. Add 0.6X AMPureXP beads and wash twice with 75% EtOH**
+> **4. Add 0.6X AMPureXP beads and wash twice with 75% EtOH**
 
-**5. Elute in 100µL EDTA-free EB (2 Libraries)**
+> **5. Elute in 100µL EDTA-free EB (2 Libraries)**
 
 
 ## **Library Prep** 
@@ -84,9 +89,9 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 10th time: 
 ```
 > $duplex-tools split_on_adapter --threads [N] --allow_multiple_splits [path/to/working/folder/1-duplextools/split9] [path/to/working/folder/1-duplextools/split10] Native 
-
-> $conda deactivate
 ```
+> $conda deactivate
+
 ### **Concatenate all Fastqs**
 **Bash Manipulation**
 
@@ -100,7 +105,8 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 
 ### **Re-Filter Reads**
 **[NanoFilt](https://github.com/wdecoster/nanofilt)** \
-***NanoFilt was installed to a conda environment***
+***NanoFilt was installed to a conda environment*** \
+After read-splitting, some reads will now be below the Q-Score cutoff and need to be re-filtered.
 ```
 > $conda activate nanofilt \
  
@@ -112,7 +118,8 @@ Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcod
 ```
 ### **Demultiplex**
 **[Nanoplexer](https://github.com/hanyue36/nanoplexer)** \
-***nanoplexer was installed to a conda environment***
+***nanoplexer was installed to a conda environment*** \
+This demultiplexer is a third-party script, and uses Minimap to align the barcodes to each read. Nanopores inate barcode splitter takes into account the error rate of the chemistry, and thus theoretically may be more accurate than this program. Due to the nature of our custom barcodes, a third-party software was needed. If you prefer to use Nanopore native barcoding approach with their barcodes, the demultiplexing pipeline may become more accurate.
 ```
 > $conda activate nanoplex
 
@@ -127,14 +134,17 @@ options:
 - -e = error
 - -O = min overlap
 - -o output
-- -a primer1...reverse_complement_of_primer2
+- -a primer_F...reverse_complement_of_primer_R
 - -m = minimum read length
 - -M = maximum read length
+- --revcomp = if inserted, will check the reverse complement of each read for the barcode, and will reformat a read to the "top strand" orientation if found.
+
+Due to the nature of Nanopore sequencing in simplex basecalling, about half of the dataset is comprised of the "bottom strand" of each amplicon. This makes the "--revcomp" option mandatory to flip all reads into the "top strand" orientation.
 
 
 > $module load cutadapt 
 
-Loop through demultiplexed files to retain names
+Loop through demultiplexed files to retain filenames and perform cutadapt individually.
 ```
 > $cd [path/to/working/folder/3-demultiplexed]
 
@@ -145,7 +155,7 @@ Loop through demultiplexed files to retain names
 ```
 
 ### **Concatenate Top and Bottom Strands**
-**Bash Manipulation**
+**Bash Manipulation** 
 ```
 > $cd /path/to/working/folder/4-trimmed/ 
  
@@ -158,6 +168,7 @@ Loop through demultiplexed files to retain names
  
 > $mkdir combined 
 ```
+
 Concatenate top and bottom (forward and reverse) into same file \
 ```
 > $for f in ./forward/* 
@@ -171,6 +182,9 @@ Concatenate top and bottom (forward and reverse) into same file \
 ### **Taxonomic Classifier**
 **[EMU](https://gitlab.com/treangenlab/emu)** \
 ***EMU was installed to a conda environment***
+The re-formatted ncbi_202006db database has been reformatted as an EMU database. You can find the entire folder needed here: \
+[ncbi_202006_db](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/ncbi_202006_RRN.zip)
+
 
 options:
 - --type = map-ont, sr, map-pb
@@ -179,12 +193,13 @@ options:
 - --db = database folder
 - --N = max alignments for each read
 - --output-dir = output directoru
-- --keep-file = keeps sam alignment files for each sample (remove if FALSE)
+- --keep-files = keeps sam alignment files for each sample (remove if FALSE)
+- --keep-counts = will allow read counts of each taxa to populate the csv (remove if FALSE)
 ```
 > $cd /path/to/working/folder/ 
 > $for file in ./4-trimmed/combined/* 
 > $do 
-> $emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/[ncbi_202006_RRN](/ 
+> $emu abundance --type map-ont --threads 28 --keep-files --keep-counts "$file" --db /path/to/database/[ncbi_202006_RRN](/ 
 	--output-dir ./5-emu
 > $done
 ```
