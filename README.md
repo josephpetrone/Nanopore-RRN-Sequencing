@@ -48,7 +48,7 @@ Any improper handling techniques at this step will increase fragmentation of the
 
 > **2. Quantify product using Qubit HS chemistry**
 
-> **3. Pool equal concentrations of DNA into a low-bind 1.5mL tube**\
+> **3. Pool equal concentrations of DNA into a low-bind 1.5mL tube**
 
 ***Aim for ≥ 4.5µg (3 Libraries) of DNA in the pool*** \
 ***If volume < 100µL, complete to 100µL with elution buffer*** 
@@ -108,7 +108,7 @@ Any improper handling techniques at this step will increase fragmentation of the
 ***NanoFilt was installed to a conda environment*** \
 After read-splitting, some reads will now be below the Q-Score cutoff and need to be re-filtered.
 ```
-> $conda activate nanofilt \
+> $conda activate nanofilt 
  
 > $cd /path/to/working/folder 
  
@@ -118,7 +118,8 @@ After read-splitting, some reads will now be below the Q-Score cutoff and need t
 ```
 ### **Demultiplex**
 **[Nanoplexer](https://github.com/hanyue36/nanoplexer)** \
-***nanoplexer was installed to a conda environment*** \
+***nanoplexer was installed to a conda environment*** 
+
 This demultiplexer is a third-party script, and uses Minimap to align the barcodes to each read. Nanopores inate barcode splitter takes into account the error rate of the chemistry, and thus theoretically may be more accurate than this program. Due to the nature of our custom barcodes, a third-party software was needed. If you prefer to use Nanopore native barcoding approach with their barcodes, the demultiplexing pipeline may become more accurate.
 ```
 > $conda activate nanoplex
@@ -129,7 +130,9 @@ This demultiplexer is a third-party script, and uses Minimap to align the barcod
 
 ### **Adapter-Primer Removal**
 **[cutadapt](https://github.com/marcelm/cutadapt)** \
+
 ***cutadapt was already installed as a module on UF Rearch Computing***
+
 options: 
 - -e = error
 - -O = min overlap
@@ -182,6 +185,7 @@ Concatenate top and bottom (forward and reverse) into same file \
 ### **Taxonomic Classifier**
 **[EMU](https://gitlab.com/treangenlab/emu)** \
 ***EMU was installed to a conda environment***
+
 The re-formatted ncbi_202006db database has been reformatted as an EMU database. You can find the entire folder needed here: \
 [ncbi_202006_db](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/ncbi_202006_RRN.zip)
 
