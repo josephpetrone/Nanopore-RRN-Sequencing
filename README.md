@@ -1,7 +1,7 @@
 # **Nanopore-RRN-Sequncing**
 Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcodes.
 
-This repo serves as a functional pipeline to perform bacterial classification and abundance analysis using Nanopore sequencing technologies. The pipeline was created specifically to use custom barcodes on RRN readsFor further information about the pipeline and the results of a validation study, please visit (and cite) the following publications from the Triplett Lab:
+This repo serves as a functional pipeline to perform bacterial classification and abundance analysis using Nanopore sequencing technologies. The pipeline was created specifically to use custom barcoded RRN amplicons to sequence using Nanopore. The primers listed here create a 4,500bp fragment containing the entire 16S rRNA, the intergenic spacer region, and most of the 23s rRNA. Theoretically, any primers you choose can work for this pipeline as long as contraints in the programs are changed. For further information about the pipeline and the results of a validation study, please visit (and cite) the following publications from the Triplett Lab:
 ```
 The development and validity of a Nanopore-based pipeline to classify Bacteria through long-read, 16S-ITS-23S rRNA sequencing (2022)
 
@@ -9,19 +9,29 @@ Early Life Gut Salmonella-Related Enteric Bacteria May Increase Risk of Future A
 ```
 
 
+
 ## **Primer Descriptions**
 ### The construct of these RRN primers are for both the forward and reverse (5' - 3'): 
-> 'Linker' -- '16-mer barcode' -- 'primer' 
+```
+'Phosphate' -- 'Linker' -- '16-mer barcode' -- 'primer' 
+```
 
 ### **The linker sequence is :** 
-> "GATC"
+... p.s this linker and 5' Phosphate on the primer also makes the amplicons suitable for Pacbio :)
+```
+"GATC"
+```
 
 ### **The primer binding sequences used were :** 
-> Forward 16S (5'-3') : AGRRTTYGATYHTDGYTYAG \
-> Reverse 23S (5'-3') : CCRAMCTGTCTCACGACG 
+```
+Forward 16S (5'-3') : AGRRTTYGATYHTDGYTYAG
+Reverse 23S (5'-3') : CCRAMCTGTCTCACGACG 
+```
 
 ### **The final primer sequences used:**
 [RRN Full Primers and Barcodes](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/RRN%20primers%20and%20barcodes.xlsx)
+
+
 
 
 ## **PCR Protocol**
@@ -35,6 +45,8 @@ Early Life Gut Salmonella-Related Enteric Bacteria May Increase Risk of Future A
 Minimum DNA input tested at ~0.5ng total 
 
 
+
+
 ## **Thermocylcer Conditions**
 - Initial Denaturation 
 > 98ºC : 30sec 
@@ -44,6 +56,8 @@ Minimum DNA input tested at ~0.5ng total
 > 72ºC : 4min 
 - Final Extenstion
 > 72ºC : 7min30sec
+
+
 
 
 ## **Amplification QC**
