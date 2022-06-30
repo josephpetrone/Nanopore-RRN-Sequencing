@@ -51,7 +51,7 @@ module load ufrc
 ## You will need to SSH into the GRID via command line but you must be on either UF-WIFI or VPN
 ## Then run this command after the ">" of course...
 ## > ssh grid@GXB01180.ad.ufl.edu
-## Password: grid
+## Password: on a sticker on the device
 ##
 ## Then navigate to your data files
 ## Normally, this is under the /data/ tab and is named after the run
