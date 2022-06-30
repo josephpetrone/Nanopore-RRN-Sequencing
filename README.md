@@ -1,5 +1,12 @@
 # **Nanopore-RRN-Sequncing**
-Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcodes 
+Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcodes.
+
+This repo serves as a functional pipeline to perform bacterial classification and abundance analysis using Nanopore sequencing technologies. The pipeline was created specifically to use custom barcodes on RRN readsFor further information about the pipeline and the results of a validation study, please visit (and cite) the following publications from the Triplett Lab:
+```
+The development and validity of a Nanopore-based pipeline to classify Bacteria through long-read, 16S-ITS-23S rRNA sequencing (2022)
+
+Early Life Gut Salmonella-Related Enteric Bacteria May Increase Risk of Future Asperger Syndrome (2022)
+```
 
 
 ## **Primer Descriptions**
@@ -220,6 +227,7 @@ All ".tsv" output from EMU will need to be placed into one folder for access int
 
 
 
+## **Citation**
 
 
 
