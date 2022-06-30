@@ -238,7 +238,162 @@ options:
 
 All ".tsv" output from EMU will need to be placed into one folder for access into RStudio.
 
+Lets load some required packages
+```
+library("phyloseq")
+require("tidyverse")
+library("ggplot2")
+library("dplyr")
+library(viridis)
+library("Rarefy")
+library(knitr)
+library("kableExtra")
+library(microbiome)
+library(ggpubr)
+```
 
+
+This chunk of code will search your folder for ".tsv" files and join the taxa and counts of each file
+```
+## set directory of emu output
+setwd("/path/to/emu/output")
+
+## searches everything ".tsv"
+list_file = list.files(".", ".tsv")
+
+# create or clear blank data.frames
+combined_r10 = data.frame()
+current_table = data.frame()
+
+
+## This chunk does most of the grunt of naming and which columns to pull out 
+for (i in list_file) {
+  print(i)
+  
+  ## each sample will be named according to whats inbetween "combined.trimmed_" and "_rel-abundance.tsv"
+  name = gsub("_rel-abundance.tsv", "", i)
+  name2 = gsub("combined.trimmed_", "", name)
+  i2 = paste("./", i, "")
+  i2 = gsub(" ", "", i2)
+  current_table = read.delim(i2, header = T)
+  
+  ## Pulls the 5th, 4th, and 2nd columns out of each tsv. If you want further than genus and species-level, change constraints here
+  current_table = current_table[,c(5,4,2)]
+  colnames(current_table) = c("genus","species", name2)
+  current_table[,3] = as.numeric(round(current_table[,3], digits = 0))
+  current_table[,1] = gsub("\\[", "",current_table[,1])
+  current_table[,1] = gsub("\\]", "",current_table[,1])
+  current_table[,2] = gsub("\\[", "",current_table[,2])
+  current_table[,2] = gsub("\\]", "",current_table[,2])
+  #current_table[,3] = gsub("\\[", "",current_table[,3])
+  #current_table[,3] = gsub("\\]", "",current_table[,3])
+  if (nrow(combined_r10) == 0) {
+    combined_r10 = current_table
+  } else {
+    combined_r10 = merge(combined_r10, current_table, all = T, by = c("genus","species"))
+    
+  }
+}
+
+## This can clean-up and weird taxa that may not have classification at genus-level
+combined_r10[1, 1] =  "Eubacteriales Family XIII. Incertae Sedis"
+combined_df[2, 1] =  "Lachnospiraceae incertae sedis"
+```
+
+This chunk of code is meant to form Pseudo OTU tables. Here I have three options for making one:
+*otu_table = just genus-level
+*otu_table_species = just species-level
+*otu_table_all = retains genus and species-level
+
+```
+combined_genus2 = combined_r10[-c(2)]
+combined_genus2[is.na(combined_genus2)] = 0
+
+#change within [] to all data columns you want numerical
+combined_genus2[,2:29] <- sapply(combined_genus2[,2:29],as.numeric)
+combined_genus2 = aggregate(as.data.frame(combined_genus2[,-1]), list(genus=combined_genus2[,1]), FUN = sum)
+rownames(combined_genus2) = paste0("OTU", 1:nrow(combined_genus2))
+
+combined_species2 = combined_r10[-c(1)]
+combined_species2[is.na(combined_species2)] = 0
+
+#change within [] to all data columns you want numerical
+combined_species2[,2:29] <- sapply(combined_species2[,2:29],as.numeric)
+combined_species2 = aggregate(as.data.frame(combined_species2[,-1]), list(species=combined_species2[,1]), FUN = sum)
+rownames(combined_species2) = paste0("OTU", 1:nrow(combined_species2))
+
+combined_all = combined_r10
+combined_all[is.na(combined_all)] = 0
+
+#change within [] to all data columns you want numerical
+combined_all[,3:30] <- sapply(combined_all[,3:30],as.numeric)
+combined_all = aggregate(.~genus + species, as.data.frame(combined_all), sum)
+rownames(combined_all) = paste0("OTU", 1:nrow(combined_all))
+
+#create an OTU table/split the table to get only OTUs and Subjects
+otu_table = select(combined_genus2, -genus)
+otu_table_species = select(combined_species2, -species)
+otu_table_all = select(combined_all, -c(species:genus))
+```
+
+This little bit will create a pseudo tax-table. Once again, three options here.
+```
+#crete a taxonomy
+taxa = combined_genus2 %>%
+  select(1)
+taxa[,1] = as.character(taxa[,1])
+colnames(taxa) <-c("genus")
+taxa=as.matrix(taxa)
+
+taxa_species = combined_species2 %>%
+  select(1)
+taxa_species[,1] = as.character(taxa_species[,1])
+colnames(taxa_species) <-c("species")
+taxa_species=as.matrix(taxa_species)
+
+taxa_all = combined_all %>%
+  select(c(1,2))
+colnames(taxa_all) <-c("Genus", "Species")
+taxa_all=as.matrix(taxa_all)
+```
+
+Heres the magic here. This will create pseudo phyloseq object and is the actual handoff here.
+```
+map <- "/Volumes/Petrone 1TB/Dissertation/RRN_paper/emu_output/plate123_subset/map.txt"
+
+## three Phyloseq objects
+ps <- phyloseq(otu_table(otu_table, taxa_are_rows=TRUE), tax_table(taxa))
+ps_species = phyloseq(otu_table(otu_table_species, taxa_are_rows=TRUE), tax_table(taxa_species))
+ps_all = phyloseq(otu_table(otu_table_all, taxa_are_rows=TRUE), tax_table(taxa_all))
+sample_metadata = import_qiime_sample_data(map)
+sample_metadata$Read.Type = as.factor(sample_metadata$Read.Type)
+
+## three Phyloseq merges
+input = merge_phyloseq(ps, sample_metadata)
+input_species = merge_phyloseq(ps_species, sample_metadata)
+input_all = merge_phyloseq(ps_all, sample_metadata)
+```
+
+This little chunk prunes any NULL samples in the metadata and removes exmpty taxa if present
+```
+OM <- prune_samples(sample_sums(input)>=0, input)
+OM = prune_taxa(taxa_sums(OM) > 0, OM)
+summarize_phyloseq(OM)
+OM
+OM = subset_samples(OM, Sample != "NULL")
+
+OM_spp <- prune_samples(sample_sums(input_species)>=0, input_species)
+OM_spp = prune_taxa(taxa_sums(OM_spp) > 0, OM_spp)
+summarize_phyloseq(OM_spp)
+OM_spp = subset_samples(OM_spp, Sample != "NULL")
+OM_spp
+
+OM_all <- prune_samples(sample_sums(input_all)>=0, input_all)
+OM_all = prune_taxa(taxa_sums(OM_all) > 0, OM_all)
+summarize_phyloseq(OM_all)
+OM_spp = subset_samples(OM_spp, Sample != "NULL")
+OM_all
+```
 
 
 ## **Citation**
