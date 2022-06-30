@@ -93,6 +93,10 @@ Any improper handling techniques at this step will increase fragmentation of the
 
 ## **Data Processing**
 **If not rebasecalling, copy all passed fastqs to working folder location**
+
+**[Bash Script (Triplett Lab README)](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/script.sh)** \
+**[ReBasecalling Command Line (Triplett Lab README)](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/basecalling.sh)**
+
 ### **Read-Splitting**
 **[Duplex-Tools](https://github.com/nanoporetech/duplex-tools)** \
 ***duplex-tools was installed to a conda environment***
