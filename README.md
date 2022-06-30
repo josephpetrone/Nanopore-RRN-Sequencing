@@ -301,9 +301,9 @@ combined_df[2, 1] =  "Lachnospiraceae incertae sedis"
 ```
 
 This chunk of code is meant to form Pseudo OTU tables. Here I have three options for making one:
-*otu_table = just genus-level
-*otu_table_species = just species-level
-*otu_table_all = retains genus and species-level
+>otu_table = just genus-level \
+>otu_table_species = just species-level \
+>otu_table_all = retains genus and species-level
 
 ```
 combined_genus2 = combined_r10[-c(2)]
@@ -397,6 +397,18 @@ OM_all
 
 
 ## **Citation**
+Please cite both our publication and the github page!!
+
+Publication:
+```
+Petrone, J. R., Rios-Glusberger, P., Millitich, P. T., Roesch, L. F. W., &amp; Triplett, E. W. (2022). The development and validity of a Nanopore-based pipeline to classify Bacteria through long-read, 16S-ITS-23S rRNA sequencing . In Progress. 
+```
+Github:
+```
+Petrone, J. R., &amp; Millitich, P. T. (2022, June 30). Nanopore-RRN-Sequncing. Github. Retrieved from https://github.com/josephpetrone/Nanopore-RRN-Sequncing/ 
+```
+
+### **This repo is unaffliated with Oxford Nanopore Technologies Ltd.**
 
 
 
