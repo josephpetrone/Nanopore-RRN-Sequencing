@@ -409,7 +409,7 @@ Petrone, J. R., Rios-Glusberger, P., Millitich, P. T., Roesch, L. F. W., &amp; T
 ```
 Github:
 ```
-Petrone, J. R., &amp; Millitich, P. T. (2022, June 30). Nanopore-RRN-Sequncing. Github. Retrieved from https://github.com/josephpetrone/Nanopore-RRN-Sequncing/ 
+Petrone, J. R., &amp; Millitich, P. T. (2022, June 30). Nanopore-RRN-Sequencing. Github. Retrieved from https://github.com/josephpetrone/Nanopore-RRN-Sequncing/ 
 ```
 
 ### **This repo is unaffliated with Oxford Nanopore Technologies Ltd.**
