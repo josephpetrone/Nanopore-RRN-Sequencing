@@ -1,16 +1,17 @@
 #!/bin/bash
-#SBATCH --job-name=cutadapt
-#SBATCH --mem=70gb
-#SBATCH -t 24:00:00
-#SBATCH --nodes=1
+#SBATCH --job-name=paper_run
+#SBATCH --mail-type=END    
+#SBATCH --mail-user=josephpetrone@ufl.edu	
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=30
+#SBATCH --mem=50gb
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=20
+#SBATCH --time=2-00:00:00
+#SBATCH --output=serial_test_%j.log   
 #SBATCH --account=triplett
 #SBATCH --qos=triplett-b
 
 module load ufrc
-module load cutadapt
-module load conda
 
 #####################################################################################################################################################################################################################################################                               
 #####################################################################################################################################################################################################################################################
@@ -112,27 +113,119 @@ module load conda
 
 
 cd /path/to/main_folder/
+module load conda
 
+####### Change ME!!!! ##########
+## Remember no spaces in bash variables
+## This is whatever directory you copied the fast5_pass to.
+first_dir=/blue/microbiology-dept/triplett-lab/josephpetrone/Nanopore/GFSC/GFSC_rrn_experiment2_5_24_2022
+
+## This is going to be the main folder location that contains the subfolders from each step here
+working_dir=/blue/microbiology-dept/triplett-lab/josephpetrone/Nanopore/GFSC/GFSC_rrn_experiment2_5_24_2022/RRN_pipeline
+
+## This has to be the fastq pass directory
+fastq_dir=/blue/microbiology-dept/triplett-lab/josephpetrone/Nanopore/GFSC/GFSC_rrn_experiment2_5_24_2022/1-hipergator_SUP_simplex_full/pass
+
+## Multithreading CPU option. MUST PUT VALUE HERE
+threads=28
+
+## Path to nanoplexer barcode fasta (this one actually can stay)
+nanoplex_dir=/blue/triplett/share/rrn_analysis/necessary_files
+
+cd $first_dir
 
 #############################################
 ############# READ SPLITTING ################
 #############################################
+
+mkdir RRN_pipeline
+cd $working_dir
+mkdir ./1-duplextools
+echo $pwd
+
 ### duplex-tools
 
-module load conda 
-conda activate duplextools
+conda activate /blue/triplett/josephpetrone/duplextools
 
-duplex_tools split_on_adapter --threads 9 \
+## Split 1
+duplex_tools split_on_adapter --threads $threads \
 	--allow_multiple_splits \
-	./fastq_pass/ \
-	./1-duplextools/split1 \
+	$fastq_dir \
+	$working_dir/1-duplextools/split1 \
 	Native
 
-duplex_tools split_on_adapter --threads 9 \
+## Split 2
+duplex_tools split_on_adapter --threads $threads \
         --allow_multiple_splits \
-        ./1-duplextools/split1 \
-        ./1-duplextools/split2 \
+        $working_dir/1-duplextools/split1 \
+        $working_dir/1-duplextools/split2 \
         Native
+rm -r $working_dir/1-duplextools/split1
+
+## Split 3
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split2 \
+        $working_dir/1-duplextools/split3 \
+        Native
+rm -r $working_dir/1-duplextools/split2
+
+## Split 4
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split3 \
+        $working_dir/1-duplextools/split4 \
+        Native
+rm -r $working_dir/1-duplextools/split3
+
+## Split 5
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split4 \
+        $working_dir/1-duplextools/split5 \
+        Native
+rm -r $working_dir/1-duplextools/split4
+
+## Split 6
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split5 \
+        $working_dir/1-duplextools/split6 \
+        Native
+rm -r $working_dir/1-duplextools/split5
+
+## Split 7
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split6 \
+        $working_dir/1-duplextools/split7 \
+        Native
+rm -r $working_dir/1-duplextools/split6
+
+## Split 8
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split7 \
+        $working_dir/1-duplextools/split8 \
+        Native
+rm -r $working_dir/1-duplextools/split7
+
+## Split 9
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split8 \
+        $working_dir/1-duplextools/split9 \
+        Native
+rm -r $working_dir/1-duplextools/split8
+
+## Split 10
+duplex_tools split_on_adapter --threads $threads \
+        --allow_multiple_splits \
+        $working_dir/1-duplextools/split9 \
+        $working_dir/1-duplextools/split10 \
+        Native
+rm -r $working_dir/1-duplextools/split9
+
 
 ####This splitting needs to be ran until no more reads are split ~10 times
 ####Change the -input -output so that splitting is done on the output of the previous  iteration 
@@ -144,9 +237,9 @@ conda deactivate
 ############# File Manipulation #############
 #############################################
 
-cd /path/to/1-duplextools/split10/
+cd $working_dir/1-duplextools/split10
 mkdir all
-zcat ./*.fastq.gz > ./all/"filename".fastq
+zcat ./*.fastq.gz > ./all/split10_all.fastq
 
 
 #############################################
@@ -156,14 +249,12 @@ zcat ./*.fastq.gz > ./all/"filename".fastq
 ## -q = Q-score cutoff
 ## --readtype (1D,2D,1D2)
 
-#module load nanofilt/2.7.1
+module load nanofilt/2.7.1
 
-cd /path/to/main/folder/
+cd $working_dir
+mkdir 2-nanofilt
 
-NanoFilt -q 10 \
-	--readtype 1D \
-	./1-duplextools/split10/all/*.fastq > ./2-nanofilt/"filename".fastq
-
+cat $working_dir/1-duplextools/split10/all/* | NanoFilt -q 10 --readtype 1D > $working_dir/2-nanofilt/split_filtered.fastq
 
 
 #############################################
@@ -172,13 +263,12 @@ NanoFilt -q 10 \
 ### Nanoplexer
 ## -b = multi-fasta containing all barcodes used (correct orientation for top and bottom strands)
 ## -d = a txt file containing the primer combination and what the sample should be named
+module load conda
+export PATH=/blue/triplett/josephpetrone/rrn_analysis/demuliplex/nanoplex/bin:$PATH
+conda activate /blue/triplett/josephpetrone/rrn_analysis/demuliplex/nanoplex
+cd  $working_dir
 
-conda activate nanoplexer
-
-nanoplexer -b /path/to/barcodes.fa \
-	-d /path/to/sample.txt \
-	-p ./3-demultiplexed \
-	./2-nanofilt/*.fastq
+nanoplexer -b $nanoplex_dir/barcodes.fa -d $nanoplex_dir/sample.txt -p ./3-demultiplexed ./2-nanofilt/*.fastq
 
 conda deactivate
 
@@ -194,11 +284,12 @@ conda deactivate
 # -M = maximum read length
 # --revcomp = If primers found on bottom strand, reorient to top stand 
 
-
+cd $working_dir/3-demultiplexed
+mkdir $working_dir/4-trimmed
 ## Loop through demultiplexed fastq files
-#module load cutadapt/3.4
+module load cutadapt/3.4
 
-cd /3-demultiplexed
+
 
 for file in *.*
 do
@@ -207,7 +298,7 @@ do
 	--revcomp \
 	-m 3000	\
 	-M 7000	\
-	-o ./4-trimmed/trimmed_$file \
+	-o $working_dir/4-trimmed/trimmed_$file \
 	-a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG \
 	$file
 done
@@ -217,16 +308,17 @@ done
 ################################################
 ## Puts top and bottom stand into separate folders and then combines them into one file
 
-cd  /path/to/4-trimmed/
+cd $working_dir/4-trimmed
 
-mkdir reverse
-mkdir forward
+mkdir $working_dir/4-trimmed/reverse
+mkdir $working_dir/4-trimmed/forward
 
 mv ./*_rev.fastq ./reverse
 mv ./*.fastq ./forward
 mv ./forward/*_unclassified.fastq ../
 
-mkdir combined
+mkdir $working_dir/4-trimmed/combined
+cd $working_dir/4-trimmed/
 
 for f in ./forward/*; do     
 	basename=${f##*/};     
@@ -235,7 +327,7 @@ for f in ./forward/*; do
 done
 
 ## Removes any NULL files of unused barcodes
-find /path/to/4-trimmed/combined/* -size 0 -print -delete
+find ./combined/* -size 0 -print -delete
 
 ######################################################
 ################ TAXONOMIC CLASSIFIER ################
@@ -249,20 +341,20 @@ find /path/to/4-trimmed/combined/* -size 0 -print -delete
 ## --output-dir = output directory
 ## --keep-files = only 
 
+cd $working_dir
 ## Load and activate conda emu enviroment
-conda activate emu
+conda activate /blue/triplett/josephpetrone/rrn_analysis/emu
 
 ## Loop through demultiplexed fastq files
 ## Giving it all the files at once is too large of a "filename"
 
-cd /path/to/main_folder/
 for file in ./4-trimmed/combined/*
 
 do
-  	emu abundance --type map-ont --threads 28 "$file" --db /path/to/database/ncbi_202006_RRN/ \
-	--output-dir ./5-emu
+  	emu abundance --type map-ont --threads $threads "$file" --db /blue/triplett/share/rrn_analysis/databases/ncbi_202006_RRN --output-dir ./5-emu
 
 done
 
 ## Shutdown conda environment
 conda deactivate
+
