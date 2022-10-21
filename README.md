@@ -143,7 +143,7 @@ After read-splitting, some reads will now be below the Q-Score cutoff and need t
 > $conda deactivate
 ```
 ### **Demultiplex**
-**[cutadapt](https://github.com/marcelm/cutadapt)** \
+**[cutadapt](https://github.com/marcelm/cutadapt)** 
 
 options: 
 - -e = error
@@ -156,7 +156,7 @@ options:
 
 
 
-[barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa)\
+[barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes_linked2.fa)
 
 ```
 > $conda activate cutadapt
@@ -169,7 +169,7 @@ options:
 	--revcomp \
 	-m 3000 \
 	-M 7000 \
-	-g file:$barcodes2.fa \
+	-g file:$barcodes_linked2.fa \
 	-o $working_dir/3-demultiplexed/combined.demuxed_{name}.fastq \
 	$working_dir/2-nanofilt/split_filtered.fastq
 	
