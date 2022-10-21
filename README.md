@@ -149,14 +149,14 @@ options:
 - -e = error
 - -O = min overlap
 - -o output
-- -a primer_F...reverse_complement_of_primer_R
+- -g list of adapters from adapter file
 - -m = minimum read length
 - -M = maximum read length
 - --revcomp = if inserted, will check the reverse complement of each read for the barcode, and will reformat a read to the "top strand" orientation if found.
 
-
-
 [barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes_linked2.fa)
+
+This demultiplexing can be the source of error so tread lightly. I have it set up so that its looking for all 16 bases of both the forward and reverse barcode under the "-O" constraint. Additionally, with "-e 0.05", 0.8 mismatches are allowed, which THE PROGRAM INTERPRETS AS ZERO MISMATCH. Size selection is also important. Although most amplicons are around 4.5Kb, we changed the size to 3kb-7kb to allow for the inclusion of all taxa, particularly Candidatus Saccharibacteria. 
 
 ```
 > $conda activate cutadapt
@@ -180,9 +180,6 @@ options:
 **[cutadapt](https://github.com/marcelm/cutadapt)** \
 
 ***cutadapt was used again to remove non-biological nucleotides***
-
-Due to the nature of Nanopore sequencing in simplex basecalling, about half of the dataset is comprised of the "bottom strand" of each amplicon. This makes the "--revcomp" option mandatory to flip all reads into the "top strand" orientation.
-
 
 > $module load cutadapt 
 
@@ -229,7 +226,8 @@ Concatenate top and bottom (forward and reverse) into same file \
 
 ### **Taxonomic Classifier**
 **[EMU](https://gitlab.com/treangenlab/emu)** \
-***EMU was installed to a conda environment***
+***EMU was installed to a conda environment*** \ 
+This script and databases are formatted for EMU 3.0+
 
 The re-formatted ncbi_202006db database has been reformatted as an EMU database. You can find the entire folder needed here: \
 [ncbi_202006_db](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/ncbi_202006_RRN.zip)
