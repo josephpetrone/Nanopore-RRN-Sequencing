@@ -1,5 +1,6 @@
 # **Nanopore-RRN-Sequncing**
 Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcodes.
+Last update: October 21, 2022
 
 This repo serves as a functional pipeline to perform bacterial classification and abundance analysis using Nanopore sequencing technologies. The pipeline was created specifically to use custom barcoded RRN amplicons to sequence using Nanopore. The primers listed here create a 4,500bp fragment containing the entire 16S rRNA, the intergenic spacer region, and most of the 23s rRNA. Theoretically, any primers you choose can work for this pipeline as long as contraints in the programs are changed. For further information about the pipeline and the results of a validation study, please visit (and cite) the following publications from the Triplett Lab:
 ```
@@ -142,25 +143,7 @@ After read-splitting, some reads will now be below the Q-Score cutoff and need t
 > $conda deactivate
 ```
 ### **Demultiplex**
-**[Nanoplexer](https://github.com/hanyue36/nanoplexer)** \
-***nanoplexer was installed to a conda environment*** 
-
-This demultiplexer is a third-party script, and uses Minimap to align the barcodes to each read. Nanopores inate barcode splitter takes into account the error rate of the chemistry, and thus theoretically may be more accurate than this program. Due to the nature of our custom barcodes, a third-party software was needed. If you prefer to use Nanopore native barcoding approach with their barcodes, the demultiplexing pipeline may become more accurate.
-
-[barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa)\
-[sample.txt](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/sample.txt)
-
-```
-> $conda activate nanoplex
-
-> $nanoplexer -b ./barcodes.fa -d ./sample.txt -p [path/to/working/folder/3-demultiplexed/] [path/to/working/folder/2-nanofilt/"filename".fastq] 
-```
-
-
-### **Adapter-Primer Removal**
 **[cutadapt](https://github.com/marcelm/cutadapt)** \
-
-***cutadapt was already installed as a module on UF Rearch Computing***
 
 options: 
 - -e = error
@@ -170,6 +153,33 @@ options:
 - -m = minimum read length
 - -M = maximum read length
 - --revcomp = if inserted, will check the reverse complement of each read for the barcode, and will reformat a read to the "top strand" orientation if found.
+
+
+
+[barcodes.fa](https://github.com/josephpetrone/Nanopore-RRN-Sequncing/blob/main/barcodes.fa)\
+
+```
+> $conda activate cutadapt
+
+> $cutadapt -j 25 \
+	--action=none \
+	-O 16 \
+	-e 0.05 \
+	--no-indels \
+	--revcomp \
+	-m 3000 \
+	-M 7000 \
+	-g file:$barcodes2.fa \
+	-o $working_dir/3-demultiplexed/combined.demuxed_{name}.fastq \
+	$working_dir/2-nanofilt/split_filtered.fastq
+	
+```
+
+
+### **Adapter-Primer Removal**
+**[cutadapt](https://github.com/marcelm/cutadapt)** \
+
+***cutadapt was used again to remove non-biological nucleotides***
 
 Due to the nature of Nanopore sequencing in simplex basecalling, about half of the dataset is comprised of the "bottom strand" of each amplicon. This makes the "--revcomp" option mandatory to flip all reads into the "top strand" orientation.
 
@@ -182,7 +192,13 @@ Loop through demultiplexed files to retain filenames and perform cutadapt indivi
 
 > $for file in *.* 
 > $do 
-> $cutadapt -e 0.2 -O 15 --revcomp -m 3000 -M 7000 -o [path/to/working/folder/4-trimmed/trimmed_$file] -a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG $file 
+> $cutadapt -e 0.2 \
+	-O 15 \
+	--revcomp \
+	-m 3000 \
+	-M 7000 \
+	-o [path/to/working/folder/4-trimmed/trimmed_$file] \
+	-a AGRRTTYGATYHTDGYTYAG...CGTCGTGAGACAGKTYGG $file 
 > $done
 ```
 
