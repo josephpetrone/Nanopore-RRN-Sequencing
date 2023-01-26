@@ -1,4 +1,5 @@
-# **This REPO is deprecated. Please vist [RESCUE]https://github.com/josephpetrone/RESCUE for newest version**
+# **This REPO is deprecated. \
+Please vist [RESCUE]https://github.com/josephpetrone/RESCUE for newest version**
 
 # **Nanopore-RRN-Sequncing**
 Pipeline and Methods for 16S-ITS-23S rRNA Nanopore Sequencing with Custom Barcodes.
