@@ -1,4 +1,4 @@
-## **This REPO is deprecated.** \
+## **This REPO is deprecated.**
 ## **Please vist [RESCUE]https://github.com/josephpetrone/RESCUE for newest version**
 
 # **Nanopore-RRN-Sequncing**
